@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-const GEMINI_API_KEY = 'AIzaSyABYmZhAQtiD3RnNMMAQYy44RXYppkl3Ac'; 
+const GEMINI_API_KEY = 'AIzaSyDJM2mANLFzwEOLpPsVZJ2ZCHPv1yM1Q2E'; 
 
 const Chatbot = () => {
   const [open, setOpen] = useState(false);
