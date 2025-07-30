@@ -78,13 +78,13 @@ const Dashboard = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending':
-        return 'text-yellow-400';
+        return 'text-yellow-600 dark:text-yellow-400';
       case 'accepted':
-        return 'text-green-400';
+        return 'text-green-600 dark:text-green-400';
       case 'rejected':
-        return 'text-red-400';
+        return 'text-red-600 dark:text-red-400';
       default:
-        return 'text-gray-400';
+        return 'text-gray-600 dark:text-gray-400';
     }
   };
 
@@ -156,45 +156,45 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="h-screen w-full bg-gray-900 text-gray-100 px-2 sm:px-4 md:px-8 py-4 sm:py-6">
+    <div className="h-screen w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-2 sm:px-4 md:px-8 py-4 sm:py-6 transition-colors duration-300">
       <div className="max-w-screen-2xl mx-auto">
-        <nav className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-center bg-gray-800 px-3 sm:px-6 py-3 sm:py-4 rounded-xl mb-5 sm:mb-7 shadow-md w-full">
-          <Link to="/dashboard" className="text-sky-300 no-underline font-bold text-base md:text-[1.1rem] transition-colors duration-200 px-2 py-1 rounded hover:text-white hover:bg-gray-900">Dashboard</Link>
-          <Link to="/search" className="text-sky-300 no-underline font-bold text-base md:text-[1.1rem] transition-colors duration-200 px-2 py-1 rounded hover:text-white hover:bg-gray-900">Global Search</Link>
-          <Link to="/add-vehicle" className="text-sky-300 no-underline font-bold text-base md:text-[1.1rem] transition-colors duration-200 px-2 py-1 rounded hover:text-white hover:bg-gray-900">Add Vehicle</Link>
+        <nav className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-center bg-white dark:bg-gray-800 px-3 sm:px-6 py-3 sm:py-4 rounded-xl mb-5 sm:mb-7 shadow-md w-full transition-colors duration-300">
+          <Link to="/dashboard" className="text-blue-600 dark:text-sky-300 no-underline font-bold text-base md:text-[1.1rem] transition-colors duration-200 px-2 py-1 rounded hover:text-blue-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-900">Dashboard</Link>
+          <Link to="/search" className="text-blue-600 dark:text-sky-300 no-underline font-bold text-base md:text-[1.1rem] transition-colors duration-200 px-2 py-1 rounded hover:text-blue-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-900">Global Search</Link>
+          <Link to="/add-vehicle" className="text-blue-600 dark:text-sky-300 no-underline font-bold text-base md:text-[1.1rem] transition-colors duration-200 px-2 py-1 rounded hover:text-blue-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-900">Add Vehicle</Link>
           <Button onClick={handleLogout} variant="secondary">Logout</Button>
         </nav>
         <header className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-2 w-full">
-          <h1 className="text-xl sm:text-2xl font-bold text-center sm:text-left w-full">Welcome, {user?.name}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-center sm:text-left w-full text-gray-900 dark:text-white">Welcome, {user?.name}</h1>
         </header>
 
         <div className="flex flex-col md:flex-row gap-3 sm:gap-5 mb-6 sm:mb-8 w-full">
-          <div className="bg-gray-800 text-white rounded-lg px-4 sm:px-6 md:px-8 py-4 sm:py-6 shadow text-center flex-1">
-            <h3 className="m-0 mb-2 text-base md:text-[1.1rem] text-sky-300">Vehicles</h3>
+          <div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg px-4 sm:px-6 md:px-8 py-4 sm:py-6 shadow text-center flex-1 transition-colors duration-300">
+            <h3 className="m-0 mb-2 text-base md:text-[1.1rem] text-blue-600 dark:text-sky-300">Vehicles</h3>
             <p className="text-lg sm:text-xl md:text-2xl m-0 font-bold">{vehicles.length}</p>
           </div>
-          <div className="bg-gray-800 text-white rounded-lg px-4 sm:px-6 md:px-8 py-4 sm:py-6 shadow text-center flex-1">
-            <h3 className="m-0 mb-2 text-base md:text-[1.1rem] text-sky-300">Pending Requests</h3>
+          <div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg px-4 sm:px-6 md:px-8 py-4 sm:py-6 shadow text-center flex-1 transition-colors duration-300">
+            <h3 className="m-0 mb-2 text-base md:text-[1.1rem] text-blue-600 dark:text-sky-300">Pending Requests</h3>
             <p className="text-lg sm:text-xl md:text-2xl m-0 font-bold">{logs.filter(log => log.status === 'pending').length}</p>
           </div>
-          <div className="bg-gray-800 text-white rounded-lg px-4 sm:px-6 md:px-8 py-4 sm:py-6 shadow text-center flex-1">
-            <h3 className="m-0 mb-2 text-base md:text-[1.1rem] text-sky-300">Total Cost Spent</h3>
+          <div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg px-4 sm:px-6 md:px-8 py-4 sm:py-6 shadow text-center flex-1 transition-colors duration-300">
+            <h3 className="m-0 mb-2 text-base md:text-[1.1rem] text-blue-600 dark:text-sky-300">Total Cost Spent</h3>
             <p className="text-lg sm:text-xl md:text-2xl m-0 font-bold">₹{totalCost.toLocaleString()}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 sm:gap-8 w-full">
           <div>
-            <h2 className="mb-4 sm:mb-5 text-sky-300 text-lg md:text-xl font-semibold">My Vehicles</h2>
+            <h2 className="mb-4 sm:mb-5 text-blue-600 dark:text-sky-300 text-lg md:text-xl font-semibold">My Vehicles</h2>
             <Link to="/add-vehicle">
               <Button>Add Vehicle</Button>
             </Link>
             <div className="mt-4 sm:mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
               {vehicles.length === 0 ? (
-                <p>No vehicles added yet.</p>
+                <p className="text-gray-600 dark:text-gray-400">No vehicles added yet.</p>
               ) : (
                 vehicles.map((vehicle) => (
-                  <div key={vehicle._id} className="bg-gray-800 p-4 sm:p-5 rounded-lg shadow text-gray-100">
+                  <div key={vehicle._id} className="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-lg shadow text-gray-900 dark:text-gray-100 transition-colors duration-300">
                     <h3 className="font-semibold text-base md:text-lg">{vehicle.make} {vehicle.model} ({vehicle.year})</h3>
                     <p>License Plate: {vehicle.licensePlate}</p>
                     <p>VIN: {vehicle.vin}</p>
@@ -213,30 +213,30 @@ const Dashboard = () => {
           </div>
 
           <div>
-            <h2 className="mb-4 sm:mb-5 text-sky-300 text-lg md:text-xl font-semibold">Recent Logs</h2>
+            <h2 className="mb-4 sm:mb-5 text-blue-600 dark:text-sky-300 text-lg md:text-xl font-semibold">Recent Logs</h2>
             {logs.length === 0 ? (
-              <p>No logs yet.</p>
+              <p className="text-gray-600 dark:text-gray-400">No logs yet.</p>
             ) : (
               <ul className="list-none p-0">
                 {logs.slice(0, 5).map((log) => (
-                  <li key={log._id} className="bg-gray-900 p-3 rounded mb-2.5 text-gray-100 shadow">
+                  <li key={log._id} className="bg-gray-100 dark:bg-gray-900 p-3 rounded mb-2.5 text-gray-900 dark:text-gray-100 shadow transition-colors duration-300">
                     <div className="flex justify-between items-start">
                       <div>
-                        <strong className="text-sky-300">{log.vehicle?.make} {log.vehicle?.model}</strong> - {log.title} <br />
-                        <span className="text-sm text-gray-400">{new Date(log.date).toLocaleDateString()}</span>
+                        <strong className="text-blue-600 dark:text-sky-300">{log.vehicle?.make} {log.vehicle?.model}</strong> - {log.title} <br />
+                        <span className="text-sm text-gray-600 dark:text-gray-400">{new Date(log.date).toLocaleDateString()}</span>
                       </div>
                       <span className={`text-sm font-medium ${getStatusColor(log.status)}`}>
                         {log.status?.toUpperCase()}
                       </span>
                     </div>
                     {log.status === 'accepted' && log.adminPrice && (
-                      <div className="text-green-400 text-sm mt-1">
+                      <div className="text-green-600 dark:text-green-400 text-sm mt-1">
                         <p><strong>Price:</strong> ₹{log.adminPrice}</p>
                         <p><strong>Completion:</strong> {new Date(log.completionDate).toLocaleDateString()}</p>
                       </div>
                     )}
                     {log.status !== 'accepted' && getLogPrice(log) > 0 && (
-                      <div className="text-gray-300 text-sm mt-1">
+                      <div className="text-gray-700 dark:text-gray-300 text-sm mt-1">
                         <p><strong>Cost:</strong> ₹{getLogPrice(log)}</p>
                       </div>
                     )}
@@ -258,7 +258,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      <Toast message={toast?.message} type={toast?.type} onDone={hideToast} />
+      {toast?.show && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
     </div>
   );
 };

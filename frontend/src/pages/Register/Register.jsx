@@ -38,19 +38,19 @@ const Register = () => {
   };
 
   return (
-    <div className="h-screen w-full bg-gradient-to-br from-gray-800 to-gray-900 px-4 md:px-8 py-6 flex justify-center items-center">
+    <div className="h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 px-4 md:px-8 py-6 flex justify-center items-center transition-colors duration-300">
       <div className="max-w-screen-2xl mx-auto w-full flex justify-center items-center">
-        <Toast message={toast?.message} type={toast?.type} onDone={hideToast} />
+        {toast?.message && <Toast message={toast.message} type={toast.type} onDone={hideToast} />}
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="bg-gray-800/90 px-9 pt-11 pb-8 rounded-2xl shadow-2xl w-full max-w-md border-l-8 border-sky-300 backdrop-blur text-gray-100 relative animate-fadeIn"
+          className="bg-white/90 dark:bg-gray-800/90 px-9 pt-11 pb-8 rounded-2xl shadow-2xl w-full max-w-md border-l-8 border-blue-500 dark:border-sky-300 backdrop-blur text-gray-900 dark:text-gray-100 relative animate-fadeIn transition-colors duration-300"
         >
-          <h2 className="mb-6 text-center text-sky-300 text-2xl tracking-wide font-bold">Register</h2>
+          <h2 className="mb-6 text-center text-blue-600 dark:text-sky-300 text-2xl tracking-wide font-bold">Register</h2>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-300 mb-2">Register as</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Register as</label>
             <div className="flex gap-4">
-              <label className="flex items-center">
+              <label className="flex items-center text-gray-700 dark:text-gray-300">
                 <input
                   type="radio"
                   value="user"
@@ -60,7 +60,7 @@ const Register = () => {
                 />
                 User
               </label>
-              <label className="flex items-center">
+              <label className="flex items-center text-gray-700 dark:text-gray-300">
                 <input
                   type="radio"
                   value="admin"
@@ -124,9 +124,9 @@ const Register = () => {
 
           <Button type="submit">Register</Button>
 
-          <p className="text-center mt-6 text-gray-400">
+          <p className="text-center mt-6 text-gray-600 dark:text-gray-400">
             Already have an account?{' '}
-            <Link to="/login" className="text-sky-300 font-bold hover:text-white transition-colors">Login here</Link>
+            <Link to="/login" className="text-blue-600 dark:text-sky-300 font-bold hover:text-blue-800 dark:hover:text-white transition-colors">Login here</Link>
           </p>
         </form>
       </div>

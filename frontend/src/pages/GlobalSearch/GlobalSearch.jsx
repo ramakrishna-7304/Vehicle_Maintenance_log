@@ -50,13 +50,13 @@ const GlobalSearch = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending':
-        return 'text-yellow-400';
+        return 'text-yellow-600 dark:text-yellow-400';
       case 'accepted':
-        return 'text-green-400';
+        return 'text-green-600 dark:text-green-400';
       case 'rejected':
-        return 'text-red-400';
+        return 'text-red-600 dark:text-red-400';
       default:
-        return 'text-gray-400';
+        return 'text-gray-600 dark:text-gray-400';
     }
   };
 
@@ -99,27 +99,27 @@ const GlobalSearch = () => {
   };
 
   return (
-    <div className="h-screen w-full bg-gray-900 text-gray-100 px-4 md:px-8 py-6">
+    <div className="h-screen w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-4 md:px-8 py-6 transition-colors duration-300">
       <div className="max-w-screen-2xl mx-auto">
-        <h2 className="text-2xl font-bold mb-6 text-sky-300 text-center">Global Log Search</h2>
+        <h2 className="text-2xl font-bold mb-6 text-blue-600 dark:text-sky-300 text-center">Global Log Search</h2>
         <div className="flex gap-2.5 mb-5 flex-wrap">
           <input
             type="text"
             placeholder="Search by title..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="px-3 py-2 rounded bg-gray-800 text-gray-100 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-300"
+            className="px-3 py-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-sky-300 transition-colors duration-200"
           />
           <input
             type="date"
             value={filterDate}
             onChange={e => setFilterDate(e.target.value)}
-            className="px-3 py-2 rounded bg-gray-800 text-gray-100 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-300"
+            className="px-3 py-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-sky-300 transition-colors duration-200"
           />
           <select
             value={sort}
             onChange={e => setSort(e.target.value)}
-            className="px-3 py-2 rounded bg-gray-800 text-gray-100 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-300"
+            className="px-3 py-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-sky-300 transition-colors duration-200"
           >
             <option value="desc">Sort by Mileage (High to Low)</option>
             <option value="asc">Sort by Mileage (Low to High)</option>
@@ -128,11 +128,11 @@ const GlobalSearch = () => {
         {loading ? (
           <Loader />
         ) : filteredLogs.length === 0 ? (
-          <p className="text-center text-gray-400 mt-10">No logs found.</p>
+          <p className="text-center text-gray-600 dark:text-gray-400 mt-10">No logs found.</p>
         ) : (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-5">
             {filteredLogs.map(log => (
-              <div key={log._id} className="bg-gray-800 p-5 rounded-lg shadow text-gray-100">
+              <div key={log._id} className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow text-gray-900 dark:text-gray-100 transition-colors duration-300">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-semibold text-lg">{log.title}</h3>
                   <span className={`text-sm font-medium ${getStatusColor(log.status)}`}>
@@ -145,16 +145,16 @@ const GlobalSearch = () => {
                   <p>Cost: ₹{getLogPrice(log)}</p>
                 )}
                 <p>Vehicle: {log.vehicle?.make} {log.vehicle?.model} ({log.vehicle?.year})</p>
-                {log.description && <p className="text-gray-300">{log.description}</p>}
+                {log.description && <p className="text-gray-600 dark:text-gray-300">{log.description}</p>}
                 
                 {log.status === 'accepted' && log.adminPrice && (
-                  <div className="text-green-400 text-sm mt-2">
+                  <div className="text-green-600 dark:text-green-400 text-sm mt-2">
                     <p><strong>Completion Date:</strong> {new Date(log.completionDate).toLocaleDateString()}</p>
                   </div>
                 )}
                 
                 {log.status === 'rejected' && (
-                  <div className="text-red-400 text-sm mt-2">
+                  <div className="text-red-600 dark:text-red-400 text-sm mt-2">
                     <p>Request rejected</p>
                   </div>
                 )}
@@ -168,7 +168,7 @@ const GlobalSearch = () => {
                       <Button 
                         onClick={() => handleCancelLog(log._id)}
                         variant="secondary"
-                        className="bg-red-600 hover:bg-red-700"
+                        className="bg-red-600 hover:bg-red-700 text-sm"
                       >
                         Cancel
                       </Button>
@@ -182,8 +182,8 @@ const GlobalSearch = () => {
             ))}
           </div>
         )}
-        <Toast message={toast?.message} type={toast?.type} onDone={hideToast} />
       </div>
+      <Toast message={toast?.message} type={toast?.type} onDone={hideToast} />
     </div>
   );
 };

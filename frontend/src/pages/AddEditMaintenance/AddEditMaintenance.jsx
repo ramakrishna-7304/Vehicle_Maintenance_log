@@ -81,11 +81,11 @@ const AddEditMaintenance = () => {
   if (loading) return <Loader />;
 
   return (
-    <div className="h-screen w-full bg-gray-900 text-gray-100 px-4 md:px-8 py-6 flex justify-center items-center">
+    <div className="h-screen w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-4 md:px-8 py-6 flex justify-center items-center transition-colors duration-300">
       <div className="max-w-screen-2xl mx-auto w-full flex justify-center items-center">
-        <Toast message={toast?.message} type={toast?.type} onDone={hideToast} />
-        <form onSubmit={handleSubmit(onSubmit)} className="bg-gray-800 p-10 rounded-lg shadow-lg w-full max-w-md text-gray-100">
-          <h2 className="mb-5 text-center text-sky-300 text-2xl font-bold">{isEdit ? 'Edit Maintenance Log' : 'Add Maintenance Log'}</h2>
+        {toast?.message && <Toast message={toast.message} type={toast.type} onDone={hideToast} />}
+        <form onSubmit={handleSubmit(onSubmit)} className="bg-white dark:bg-gray-800 p-10 rounded-lg shadow-lg w-full max-w-md text-gray-900 dark:text-gray-100 transition-colors duration-300">
+          <h2 className="mb-5 text-center text-blue-600 dark:text-sky-300 text-2xl font-bold">{isEdit ? 'Edit Maintenance Log' : 'Add Maintenance Log'}</h2>
           <InputField label="Title" name="title" register={register} error={errors.title} />
           <InputField label="Description" name="description" register={register} error={errors.description} />
           <InputField label="Date" name="date" type="date" register={register} error={errors.date} />
@@ -93,12 +93,12 @@ const AddEditMaintenance = () => {
           
           {!isEdit && (
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Select Company
               </label>
               <select
                 {...register('assignedAdminId')}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-gray-100 focus:outline-none focus:ring-2 focus:ring-sky-300"
+                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-sky-300 transition-colors duration-200"
               >
                 <option value="">Select a company...</option>
                 {companies.map((company) => (
@@ -108,7 +108,7 @@ const AddEditMaintenance = () => {
                 ))}
               </select>
               {errors.assignedAdminId && (
-                <p className="text-red-400 text-sm mt-1">{errors.assignedAdminId.message}</p>
+                <p className="text-red-500 dark:text-red-400 text-sm mt-1">{errors.assignedAdminId.message}</p>
               )}
             </div>
           )}

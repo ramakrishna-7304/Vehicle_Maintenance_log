@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
+import ThemeToggler from './components/ThemeToggler/ThemeToggler';
 
 // Page Imports
 import Login from './pages/Login/Login';
@@ -20,6 +21,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <ThemeToggler />
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
