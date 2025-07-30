@@ -67,11 +67,11 @@ const AddEditVehicle = () => {
   if (loading) return <Loader />;
 
   return (
-    <div className="h-screen w-full bg-gray-900 text-gray-100 px-4 md:px-8 py-6 flex justify-center items-center">
+    <div className="h-screen w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-4 md:px-8 py-6 flex justify-center items-center transition-colors duration-300">
       <div className="max-w-screen-2xl mx-auto w-full flex justify-center items-center">
-        <Toast message={toast?.message} type={toast?.type} onDone={hideToast} />
-        <form onSubmit={handleSubmit(onSubmit)} className="bg-gray-800 p-10 rounded-lg shadow-lg w-full max-w-md text-gray-100">
-          <h2 className="mb-5 text-center text-sky-300 text-2xl font-bold">{isEdit ? 'Edit Vehicle' : 'Add Vehicle'}</h2>
+        {toast?.message && <Toast message={toast.message} type={toast.type} onDone={hideToast} />}
+        <form onSubmit={handleSubmit(onSubmit)} className="bg-white dark:bg-gray-800 p-10 rounded-lg shadow-lg w-full max-w-md text-gray-900 dark:text-gray-100 transition-colors duration-300">
+          <h2 className="mb-5 text-center text-blue-600 dark:text-sky-300 text-2xl font-bold">{isEdit ? 'Edit Vehicle' : 'Add Vehicle'}</h2>
           <InputField label="Make" name="make" register={register} error={errors.make} />
           <InputField label="Model" name="model" register={register} error={errors.model} />
           <InputField label="Year" name="year" type="number" register={register} error={errors.year} />

@@ -7,6 +7,11 @@ const maintenanceLogSchema = mongoose.Schema(
       required: true,
       ref: 'Vehicle',
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: 'User',
+    },
     title: {
       type: String,
       required: true,
@@ -29,6 +34,36 @@ const maintenanceLogSchema = mongoose.Schema(
     },
     nextDueDate: {
       type: Date,
+    },
+    // New fields for approval system
+    assignedAdmin: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'accepted', 'rejected'],
+      default: 'pending',
+    },
+    adminPrice: {
+      type: Number,
+      min: 0,
+    },
+    completionDate: {
+      type: Date,
+    },
+    adminNotes: {
+      type: String,
+    },
+    // Track if completion reminder email has been sent
+    completionReminderSent: {
+      type: Boolean,
+      default: false,
+    },
+    // Track if overdue pickup reminder email has been sent
+    overdueReminderSent: {
+      type: Boolean,
+      default: false,
     },
   },
   {

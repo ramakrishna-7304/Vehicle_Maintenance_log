@@ -28,14 +28,14 @@ const Login = () => {
   };
 
   return (
-    <div className="h-screen w-full bg-gradient-to-br from-gray-800 to-gray-900 px-4 md:px-8 py-6 flex justify-center items-center">
+    <div className="h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 px-4 md:px-8 py-6 flex justify-center items-center transition-colors duration-300">
       <div className="max-w-screen-2xl mx-auto w-full flex justify-center items-center">
-        <Toast message={toast?.message} type={toast?.type} onDone={hideToast} />
+        {toast?.message && <Toast message={toast.message} type={toast.type} onDone={hideToast} />}
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="bg-gray-800/90 px-9 pt-11 pb-8 rounded-2xl shadow-2xl w-full max-w-md border-l-8 border-sky-300 backdrop-blur text-gray-100 relative animate-fadeIn"
+          className="bg-white/90 dark:bg-gray-800/90 px-9 pt-11 pb-8 rounded-2xl shadow-2xl w-full max-w-md border-l-8 border-blue-500 dark:border-sky-300 backdrop-blur text-gray-900 dark:text-gray-100 relative animate-fadeIn transition-colors duration-300"
         >
-          <h2 className="mb-6 text-center text-sky-300 text-2xl tracking-wide font-bold">Login</h2>
+          <h2 className="mb-6 text-center text-blue-600 dark:text-sky-300 text-2xl tracking-wide font-bold">Login</h2>
           <InputField
             label="Email"
             name="email"
@@ -50,9 +50,9 @@ const Login = () => {
             error={errors.password}
           />
           <Button type="submit">Login</Button>
-          <p className="text-center mt-6 text-gray-400">
+          <p className="text-center mt-6 text-gray-600 dark:text-gray-400">
             Don't have an account?{' '}
-            <Link to="/register" className="text-sky-300 font-bold hover:text-white transition-colors">Register here</Link>
+            <Link to="/register" className="text-blue-600 dark:text-sky-300 font-bold hover:text-blue-800 dark:hover:text-white transition-colors">Register here</Link>
           </p>
         </form>
       </div>
