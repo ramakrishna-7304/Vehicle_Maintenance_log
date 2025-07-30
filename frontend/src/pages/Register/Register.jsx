@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useNavigate, Link } from 'react-router-dom';
@@ -10,6 +10,7 @@ import Button from '../../components/Button/Button';
 import Toast from '../../components/Toast/Toast';
 
 const Register = () => {
+  const [role, setRole] = useState('user');
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: yupResolver(registrationSchema),
   });
@@ -19,7 +20,16 @@ const Register = () => {
 
   const onSubmit = async (data) => {
     try {
-      await registerUser(data.name, data.email, data.password);
+      const registrationData = {
+        ...data,
+        role,
+        ...(role === 'admin' && {
+          companyName: data.companyName,
+          companyPassword: data.companyPassword,
+        }),
+      };
+
+      await registerUser(registrationData);
       showToast('Registration successful! Please login.', 'success');
       setTimeout(() => navigate('/dashboard'), 2000);
     } catch (error) {
@@ -36,6 +46,33 @@ const Register = () => {
           className="bg-gray-800/90 px-9 pt-11 pb-8 rounded-2xl shadow-2xl w-full max-w-md border-l-8 border-sky-300 backdrop-blur text-gray-100 relative animate-fadeIn"
         >
           <h2 className="mb-6 text-center text-sky-300 text-2xl tracking-wide font-bold">Register</h2>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-300 mb-2">Register as</label>
+            <div className="flex gap-4">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  value="user"
+                  checked={role === 'user'}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="mr-2"
+                />
+                User
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  value="admin"
+                  checked={role === 'admin'}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="mr-2"
+                />
+                Admin
+              </label>
+            </div>
+          </div>
+
           <InputField
             label="Name"
             name="name"
@@ -62,7 +99,31 @@ const Register = () => {
             register={register}
             error={errors.confirmPassword}
           />
+
+          {role === 'admin' && (
+            <>
+              <InputField
+                label="Company Name"
+                name="companyName"
+                register={register}
+                error={errors.companyName}
+              />
+              <InputField
+                label="Company Password"
+                name="companyPassword"
+                type="password"
+                register={register}
+                error={errors.companyPassword}
+                placeholder="Enter: 123123"
+              />
+            </>
+          )}
+
+          {/* ✅ Hidden input to pass 'role' to validation schema */}
+          <input type="hidden" value={role} {...register('role')} />
+
           <Button type="submit">Register</Button>
+
           <p className="text-center mt-6 text-gray-400">
             Already have an account?{' '}
             <Link to="/login" className="text-sky-300 font-bold hover:text-white transition-colors">Login here</Link>
@@ -73,4 +134,4 @@ const Register = () => {
   );
 };
 
-export default Register; 
+export default Register;

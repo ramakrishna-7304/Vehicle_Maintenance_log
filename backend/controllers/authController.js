@@ -5,7 +5,7 @@ const generateToken = require('../utils/generateToken');
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res, next) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role, companyName, companyPassword } = req.body;
 
   try {
     const userExists = await User.findOne({ email });
@@ -15,10 +15,24 @@ const registerUser = async (req, res, next) => {
       throw new Error('User already exists');
     }
 
+    // Validate admin registration
+    if (role === 'admin') {
+      if (!companyName) {
+        res.status(400);
+        throw new Error('Company name is required for admin registration');
+      }
+      if (companyPassword !== '123123') {
+        res.status(400);
+        throw new Error('Invalid company password');
+      }
+    }
+
     const user = await User.create({
       name,
       email,
       password,
+      role: role || 'user',
+      companyName: role === 'admin' ? companyName : undefined,
     });
 
     if (user) {
@@ -26,6 +40,8 @@ const registerUser = async (req, res, next) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
+        companyName: user.companyName,
         token: generateToken(user._id),
       });
     } else {
@@ -51,6 +67,8 @@ const authUser = async (req, res, next) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
+        companyName: user.companyName,
         token: generateToken(user._id),
       });
     } else {

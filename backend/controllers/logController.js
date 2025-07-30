@@ -1,7 +1,8 @@
 require('dotenv').config();
 const MaintenanceLog = require('../models/MaintenanceLog');
 const Vehicle = require('../models/Vehicle');
-const sendEmail = require('../utils/sendEmail');
+const User = require('../models/User');
+const { sendEmail } = require('../utils/emailService');
 
 // @desc    Get all logs for a vehicle
 // @route   GET /api/logs?vehicleId=<vehicleId>
@@ -16,7 +17,7 @@ const getLogs = async (req, res, next) => {
       throw new Error('Vehicle not found or not owned by user');
     }
 
-    const logs = await MaintenanceLog.find({ vehicle: vehicleId });
+    const logs = await MaintenanceLog.find({ vehicle: vehicleId }).populate('assignedAdmin', 'name companyName');
     res.json(logs);
   } catch (error) {
     next(error);
@@ -28,7 +29,7 @@ const getLogs = async (req, res, next) => {
 // @access  Private
 const getLogById = async (req, res, next) => {
   try {
-    const log = await MaintenanceLog.findById(req.params.id).populate('vehicle');
+    const log = await MaintenanceLog.findById(req.params.id).populate('vehicle').populate('assignedAdmin', 'name companyName');
 
     if (log && log.vehicle.user.toString() === req.user._id.toString()) {
       res.json(log);
@@ -45,7 +46,7 @@ const getLogById = async (req, res, next) => {
 // @route   POST /api/logs
 // @access  Private
 const createLog = async (req, res, next) => {
-  const { vehicleId, title, description, date, mileage, cost, nextDueDate } = req.body;
+  const { vehicleId, title, description, date, mileage, assignedAdminId } = req.body;
 
   try {
     const vehicle = await Vehicle.findById(vehicleId).populate('user');
@@ -54,30 +55,40 @@ const createLog = async (req, res, next) => {
       throw new Error('Vehicle not found or not owned by user');
     }
 
+    // Verify admin exists
+    const admin = await User.findById(assignedAdminId);
+    if (!admin || admin.role !== 'admin') {
+      res.status(400);
+      throw new Error('Invalid admin selected');
+    }
+
     const log = new MaintenanceLog({
       vehicle: vehicleId,
+      user: req.user._id,
       title,
       description,
       date,
       mileage,
-      cost,
-      nextDueDate,
+      cost: 0, // Will be set by admin
+      assignedAdmin: assignedAdminId,
+      status: 'pending',
     });
 
     const createdLog = await log.save();
 
-    // Send email to user about new log
+    // Send email to user about new log submission
     try {
       await sendEmail({
         to: req.user.email,
-        subject: `New Maintenance Log Added for ${vehicle.make} ${vehicle.model}`,
-        html: `<h3>New Maintenance Log Added</h3>
+        subject: `Maintenance Log Submitted for ${vehicle.make} ${vehicle.model}`,
+        html: `<h3>Maintenance Log Submitted</h3>
           <p><strong>Vehicle:</strong> ${vehicle.make} ${vehicle.model} (${vehicle.year})</p>
           <p><strong>Title:</strong> ${title}</p>
           <p><strong>Date:</strong> ${date}</p>
           <p><strong>Mileage:</strong> ${mileage}</p>
-          <p><strong>Cost:</strong> ₹${cost}</p>
           <p><strong>Description:</strong> ${description}</p>
+          <p><strong>Assigned to:</strong> ${admin.companyName}</p>
+          <p>Your maintenance request has been submitted and is pending approval.</p>
         `,
       });
     } catch (e) {
@@ -91,21 +102,25 @@ const createLog = async (req, res, next) => {
   }
 };
 
-// @desc    Update a log
+// @desc    Update a log (only for pending logs)
 // @route   PUT /api/logs/:id
 // @access  Private
 const updateLog = async (req, res, next) => {
-    const { title, description, date, mileage, cost, nextDueDate } = req.body;
+    const { title, description, date, mileage } = req.body;
   try {
     const log = await MaintenanceLog.findById(req.params.id).populate('vehicle');
 
     if (log && log.vehicle.user.toString() === req.user._id.toString()) {
+      // Only allow updates for pending logs
+      if (log.status !== 'pending') {
+        res.status(400);
+        throw new Error('Cannot update approved or rejected logs');
+      }
+
       log.title = title || log.title;
       log.description = description || log.description;
       log.date = date || log.date;
       log.mileage = mileage || log.mileage;
-      log.cost = cost || log.cost;
-      log.nextDueDate = nextDueDate || log.nextDueDate;
 
       const updatedLog = await log.save();
       res.json(updatedLog);
@@ -123,16 +138,48 @@ const updateLog = async (req, res, next) => {
 // @access  Private
 const deleteLog = async (req, res, next) => {
   try {
-    const log = await MaintenanceLog.findById(req.params.id).populate('vehicle');
+    console.log('Delete log request for ID:', req.params.id);
+    console.log('User ID:', req.user._id);
 
-    if (log && log.vehicle.user.toString() === req.user._id.toString()) {
-      await log.remove();
-      res.json({ message: 'Log removed' });
-    } else {
+    const log = await MaintenanceLog.findById(req.params.id).populate('vehicle');
+    
+    if (!log) {
+      console.log('Log not found');
       res.status(404);
       throw new Error('Log not found');
     }
+
+    console.log('Log found:', {
+      logId: log._id,
+      vehicleUserId: log.vehicle?.user,
+      requestUserId: req.user._id,
+      status: log.status
+    });
+
+    if (log.vehicle.user.toString() !== req.user._id.toString()) {
+      console.log('User not authorized to delete this log');
+      res.status(403);
+      throw new Error('Not authorized to delete this log');
+    }
+
+    // Only allow deletion for pending logs
+    if (log.status !== 'pending') {
+      console.log('Cannot delete non-pending log, status:', log.status);
+      res.status(400);
+      throw new Error('Cannot delete approved or rejected logs');
+    }
+
+    const result = await MaintenanceLog.deleteOne({ _id: req.params.id });
+    console.log('Delete result:', result);
+
+    if (result.deletedCount === 0) {
+      res.status(404);
+      throw new Error('Log not found or already deleted');
+    }
+
+    res.json({ message: 'Log removed successfully' });
   } catch (error) {
+    console.error('Error in deleteLog:', error);
     next(error);
   }
 };

@@ -3,6 +3,8 @@ import axios from 'axios';
 import useAuth from '../../hooks/useAuth';
 import Loader from '../../components/Loader/Loader';
 import Button from '../../components/Button/Button';
+import Toast from '../../components/Toast/Toast';
+import { useToast } from '../../hooks/useToast';
 import { Link } from 'react-router-dom';
 
 const GlobalSearch = () => {
@@ -13,6 +15,7 @@ const GlobalSearch = () => {
   const [search, setSearch] = useState('');
   const [filterDate, setFilterDate] = useState('');
   const [sort, setSort] = useState('desc');
+  const { toast, showToast, hideToast } = useToast();
 
   useEffect(() => {
     const fetchAllLogs = async () => {
@@ -43,6 +46,57 @@ const GlobalSearch = () => {
   filteredLogs = filteredLogs.sort((a, b) =>
     sort === 'asc' ? a.mileage - b.mileage : b.mileage - a.mileage
   );
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'text-yellow-400';
+      case 'accepted':
+        return 'text-green-400';
+      case 'rejected':
+        return 'text-red-400';
+      default:
+        return 'text-gray-400';
+    }
+  };
+
+  const getLogPrice = (log) => {
+    if (log.status === 'accepted' && log.adminPrice) {
+      return log.adminPrice;
+    }
+    return log.cost || 0;
+  };
+
+  const handleCancelLog = async (logId) => {
+    try {
+      console.log('Attempting to cancel log:', logId);
+      const config = { headers: { Authorization: `Bearer ${user.token}` } };
+      
+      const response = await axios.delete(`/api/logs/${logId}`, config);
+      console.log('Cancel response:', response.data);
+      
+      // Remove the log from local state
+      setLogs(logs.filter(log => log._id !== logId));
+      showToast('Maintenance log cancelled successfully!', 'success');
+    } catch (error) {
+      console.error('Cancel log error:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      
+      let errorMessage = 'Failed to cancel maintenance log';
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Log not found';
+      } else if (error.response?.status === 403) {
+        errorMessage = 'Not authorized to cancel this log';
+      } else if (error.response?.status === 400) {
+        errorMessage = 'Cannot cancel this log (may be approved or rejected)';
+      }
+      
+      showToast(errorMessage, 'error');
+    }
+  };
 
   return (
     <div className="h-screen w-full bg-gray-900 text-gray-100 px-4 md:px-8 py-6">
@@ -79,20 +133,56 @@ const GlobalSearch = () => {
           <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-5">
             {filteredLogs.map(log => (
               <div key={log._id} className="bg-gray-800 p-5 rounded-lg shadow text-gray-100">
-                <h3 className="font-semibold text-lg mb-1">{log.title}</h3>
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-semibold text-lg">{log.title}</h3>
+                  <span className={`text-sm font-medium ${getStatusColor(log.status)}`}>
+                    {log.status?.toUpperCase()}
+                  </span>
+                </div>
                 <p>Date: {log.date?.slice(0, 10)}</p>
-                <p>Mileage: {log.mileage}</p>
-                <p>Cost: {log.cost}</p>
+                <p>Mileage: {log.mileage?.toLocaleString()}</p>
+                {getLogPrice(log) > 0 && (
+                  <p>Cost: ₹{getLogPrice(log)}</p>
+                )}
                 <p>Vehicle: {log.vehicle?.make} {log.vehicle?.model} ({log.vehicle?.year})</p>
-                <p>{log.description}</p>
-                <div className="mt-2 flex gap-2.5">
-                  <Link to={`/edit-log/${log._id}`}><Button variant="secondary">Edit</Button></Link>
-                  <Link to={`/history/${log.vehicle?._id}`}><Button>View History</Button></Link>
+                {log.description && <p className="text-gray-300">{log.description}</p>}
+                
+                {log.status === 'accepted' && log.adminPrice && (
+                  <div className="text-green-400 text-sm mt-2">
+                    <p><strong>Completion Date:</strong> {new Date(log.completionDate).toLocaleDateString()}</p>
+                  </div>
+                )}
+                
+                {log.status === 'rejected' && (
+                  <div className="text-red-400 text-sm mt-2">
+                    <p>Request rejected</p>
+                  </div>
+                )}
+                
+                <div className="mt-3 flex gap-2">
+                  {log.status === 'pending' && (
+                    <>
+                      <Link to={`/edit-log/${log._id}`}>
+                        <Button variant="secondary">Edit</Button>
+                      </Link>
+                      <Button 
+                        onClick={() => handleCancelLog(log._id)}
+                        variant="secondary"
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Cancel
+                      </Button>
+                    </>
+                  )}
+                  <Link to={`/history/${log.vehicle?._id}`}>
+                    <Button>View History</Button>
+                  </Link>
                 </div>
               </div>
             ))}
           </div>
         )}
+        <Toast message={toast?.message} type={toast?.type} onDone={hideToast} />
       </div>
     </div>
   );

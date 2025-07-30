@@ -18,10 +18,24 @@ const AddEditMaintenance = () => {
   const navigate = useNavigate();
   const { toast, showToast, hideToast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [companies, setCompanies] = useState([]);
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm({
     resolver: yupResolver(maintenanceLogSchema),
   });
+
+  // Fetch companies for dropdown
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const { data } = await axios.get('/api/admin/companies');
+        setCompanies(data);
+      } catch (error) {
+        console.error('Failed to fetch companies:', error);
+      }
+    };
+    fetchCompanies();
+  }, []);
 
   useEffect(() => {
     if (isEdit) {
@@ -30,13 +44,12 @@ const AddEditMaintenance = () => {
         headers: { Authorization: `Bearer ${user.token}` },
       })
         .then(res => {
-          const { title, description, date, mileage, cost, nextDueDate } = res.data;
+          const { title, description, date, mileage, assignedAdmin } = res.data;
           setValue('title', title);
           setValue('description', description);
           setValue('date', date ? date.substring(0, 10) : '');
           setValue('mileage', mileage);
-          setValue('cost', cost);
-          setValue('nextDueDate', nextDueDate ? nextDueDate.substring(0, 10) : '');
+          setValue('assignedAdminId', assignedAdmin?._id);
         })
         .catch(() => showToast('Failed to load log', 'error'))
         .finally(() => setLoading(false));
@@ -55,7 +68,7 @@ const AddEditMaintenance = () => {
         await axios.post('/api/logs', { ...data, vehicleId }, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
-        showToast('Log added!', 'success');
+        showToast('Log submitted for approval!', 'success');
       }
       setTimeout(() => navigate(`/history/${vehicleId || data.vehicleId}`), 1200);
     } catch (error) {
@@ -77,9 +90,30 @@ const AddEditMaintenance = () => {
           <InputField label="Description" name="description" register={register} error={errors.description} />
           <InputField label="Date" name="date" type="date" register={register} error={errors.date} />
           <InputField label="Mileage" name="mileage" type="number" register={register} error={errors.mileage} />
-          <InputField label="Cost" name="cost" type="number" register={register} error={errors.cost} />
-          <InputField label="Next Due Date" name="nextDueDate" type="date" register={register} error={errors.nextDueDate} />
-          <Button type="submit">{isEdit ? 'Update' : 'Add'} Log</Button>
+          
+          {!isEdit && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Select Company
+              </label>
+              <select
+                {...register('assignedAdminId')}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-gray-100 focus:outline-none focus:ring-2 focus:ring-sky-300"
+              >
+                <option value="">Select a company...</option>
+                {companies.map((company) => (
+                  <option key={company._id} value={company._id}>
+                    {company.companyName}
+                  </option>
+                ))}
+              </select>
+              {errors.assignedAdminId && (
+                <p className="text-red-400 text-sm mt-1">{errors.assignedAdminId.message}</p>
+              )}
+            </div>
+          )}
+
+          <Button type="submit">{isEdit ? 'Update' : 'Submit'} Log</Button>
         </form>
       </div>
     </div>

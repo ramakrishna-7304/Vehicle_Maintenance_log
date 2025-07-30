@@ -31,7 +31,27 @@ const VehicleCostHistory = () => {
     fetchData();
   }, [user.token, vehicleId]);
 
-  const totalCost = logs.reduce((sum, log) => sum + (Number(log.cost) || 0), 0);
+  const getLogPrice = (log) => {
+    if (log.status === 'accepted' && log.adminPrice) {
+      return log.adminPrice;
+    }
+    return log.cost || 0;
+  };
+
+  const totalCost = logs.reduce((sum, log) => sum + Number(getLogPrice(log)), 0);
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'text-yellow-400';
+      case 'accepted':
+        return 'text-green-400';
+      case 'rejected':
+        return 'text-red-400';
+      default:
+        return 'text-gray-400';
+    }
+  };
 
   return (
     <div className="h-screen w-full bg-gray-900 text-gray-100 px-4 md:px-8 py-6">
@@ -49,10 +69,27 @@ const VehicleCostHistory = () => {
               <div key={log._id} className="bg-gray-800 rounded-lg p-5 shadow">
                 <div className="flex justify-between mb-2 text-gray-400 text-base">
                   <span>{log.date?.slice(0, 10)}</span>
-                  <span className="text-sky-300 font-bold">₹{Number(log.cost).toLocaleString()}</span>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-medium ${getStatusColor(log.status)}`}>
+                      {log.status?.toUpperCase()}
+                    </span>
+                    <span className="text-sky-300 font-bold">₹{getLogPrice(log).toLocaleString()}</span>
+                  </div>
                 </div>
                 <h3 className="font-semibold text-lg mb-1">{log.title}</h3>
                 <p>{log.description}</p>
+                
+                {log.status === 'accepted' && log.adminPrice && (
+                  <div className="text-green-400 text-sm mt-2">
+                    <p><strong>Completion Date:</strong> {new Date(log.completionDate).toLocaleDateString()}</p>
+                  </div>
+                )}
+                
+                {log.status === 'rejected' && (
+                  <div className="text-red-400 text-sm mt-2">
+                    <p>Request rejected</p>
+                  </div>
+                )}
               </div>
             ))}
           </div>

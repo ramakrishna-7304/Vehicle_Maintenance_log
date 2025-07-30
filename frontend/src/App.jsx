@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import Login from './pages/Login/Login';
 import Register from './pages/Register/Register';
 import Dashboard from './pages/Dashboard/Dashboard';
+import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
 import AddEditVehicle from './pages/AddEditVehicle/AddEditVehicle';
 import AddEditMaintenance from './pages/AddEditMaintenance/AddEditMaintenance';
 import MaintenanceHistory from './pages/MaintenanceHistory/MaintenanceHistory';
@@ -27,6 +28,7 @@ function App() {
 
           {/* Protected Routes */}
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/admin-dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           <Route path="/add-vehicle" element={<ProtectedRoute><AddEditVehicle /></ProtectedRoute>} />
           <Route path="/edit-vehicle/:id" element={<ProtectedRoute><AddEditVehicle /></ProtectedRoute>} />
           <Route path="/add-log/:vehicleId" element={<ProtectedRoute><AddEditMaintenance /></ProtectedRoute>} />
