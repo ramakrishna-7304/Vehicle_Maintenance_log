@@ -1,6 +1,6 @@
 const MaintenanceLog = require('../models/MaintenanceLog');
 const User = require('../models/User');
-const { sendApprovalEmail } = require('../utils/emailService');
+const { sendLogStatusEmail } = require('../utils/emailService');
 
 // @desc    Get all logs assigned to admin
 // @route   GET /api/admin/logs
@@ -46,16 +46,19 @@ const acceptLog = async (req, res, next) => {
 
     // Send email notification
     console.log('📧 Attempting to send acceptance email...');
-    const emailSent = await sendApprovalEmail(
+    const emailResult = await sendLogStatusEmail(
       log.user.email,
       log.user.name,
       log.title,
       'accepted',
-      price,
-      completionDate
+      req.user.companyName,
+      {
+        price: price,
+        completionDate: completionDate
+      }
     );
 
-    if (emailSent) {
+    if (emailResult.success) {
       console.log('✅ Acceptance email sent successfully');
     } else {
       console.log('⚠️ Warning: Acceptance email failed to send, but log was updated');
@@ -63,8 +66,8 @@ const acceptLog = async (req, res, next) => {
 
     res.json({
       ...log.toObject(),
-      emailSent,
-      message: emailSent 
+      emailSent: emailResult.success,
+      message: emailResult.success 
         ? 'Log accepted and email notification sent' 
         : 'Log accepted but email notification failed'
     });
@@ -99,16 +102,18 @@ const rejectLog = async (req, res, next) => {
 
     // Send email notification
     console.log('📧 Attempting to send rejection email...');
-    const emailSent = await sendApprovalEmail(
+    const emailResult = await sendLogStatusEmail(
       log.user.email,
       log.user.name,
       log.title,
       'rejected',
-      null,
-      null
+      req.user.companyName,
+      {
+        rejectionReason: adminNotes
+      }
     );
 
-    if (emailSent) {
+    if (emailResult.success) {
       console.log('✅ Rejection email sent successfully');
     } else {
       console.log('⚠️ Warning: Rejection email failed to send, but log was updated');
@@ -116,8 +121,8 @@ const rejectLog = async (req, res, next) => {
 
     res.json({
       ...log.toObject(),
-      emailSent,
-      message: emailSent 
+      emailSent: emailResult.success,
+      message: emailResult.success 
         ? 'Log rejected and email notification sent' 
         : 'Log rejected but email notification failed'
     });

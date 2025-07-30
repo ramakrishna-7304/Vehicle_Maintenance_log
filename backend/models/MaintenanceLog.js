@@ -55,6 +55,16 @@ const maintenanceLogSchema = mongoose.Schema(
     adminNotes: {
       type: String,
     },
+    // Track if completion reminder email has been sent
+    completionReminderSent: {
+      type: Boolean,
+      default: false,
+    },
+    // Track if overdue pickup reminder email has been sent
+    overdueReminderSent: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

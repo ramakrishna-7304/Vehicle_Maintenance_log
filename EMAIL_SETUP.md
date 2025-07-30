@@ -1,7 +1,10 @@
-# Email Setup Guide
+# Email Setup Guide - Enhanced Version
 
 ## Overview
-The Vehicle Maintenance Log system sends email notifications to users when their maintenance logs are accepted or rejected by admins.
+The Vehicle Maintenance Log system now has a robust email notification system that sends emails when:
+1. **Log Status Changes**: When admins accept, reject, or complete maintenance logs
+2. **User Notifications**: Professional HTML emails with company branding
+3. **Error Handling**: Graceful handling of email failures without breaking the app
 
 ## Email Configuration
 
@@ -26,143 +29,157 @@ EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_16_character_app_password
 ```
 
-### 2. Alternative Email Services
+### 2. SMTP Configuration
+The system uses Gmail SMTP with these settings:
+- **Host**: smtp.gmail.com
+- **Port**: 587
+- **Secure**: false
+- **Authentication**: Gmail App Password
 
-#### Outlook/Hotmail
-```javascript
-const transporter = nodemailer.createTransport({
-  service: 'outlook',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-```
+## Email Functions
 
-#### Custom SMTP
-```javascript
-const transporter = nodemailer.createTransport({
-  host: 'your-smtp-host.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-```
+### 1. `sendEmail(to, subject, html, text)`
+**Purpose**: General-purpose email sending function
+**Parameters**:
+- `to`: Recipient email address
+- `subject`: Email subject
+- `html`: HTML content
+- `text`: Plain text content (optional)
 
-## Testing Email Configuration
+**Returns**: `{ success: boolean, messageId?: string, error?: string }`
 
-### 1. Check Environment Variables
-Make sure your `.env` file has the correct email settings:
-```bash
-# Check if variables are loaded
-echo $EMAIL_USER
-echo $EMAIL_PASS
-```
+### 2. `sendLogStatusEmail(userEmail, userName, logTitle, status, companyName, additionalData)`
+**Purpose**: Send status-specific emails for maintenance logs
+**Parameters**:
+- `userEmail`: User's email address
+- `userName`: User's name
+- `logTitle`: Maintenance log title
+- `status`: 'accepted', 'rejected', or 'completed'
+- `companyName`: Admin's company name
+- `additionalData`: Object with price, completionDate, or rejectionReason
 
-### 2. Test Email Service
-The system will automatically test the email configuration when:
-- The server starts
-- An admin accepts/rejects a log
-
-### 3. Manual Testing
-You can test the email service by:
-1. Starting the backend server
-2. Looking for these console messages:
-   ```
-   ✅ Email transporter verified successfully
-   ```
+### 3. `sendTestEmail(toEmail)`
+**Purpose**: Send a test email to verify configuration
+**Parameters**:
+- `toEmail`: Email address to send test to
 
 ## Email Templates
 
 ### Acceptance Email
-When a log is accepted, users receive:
-- **Subject**: "Maintenance Log Approved"
-- **Content**: 
-  - Greeting with user name
-  - Log title and status
-  - Price and completion date
-  - Styled HTML template
+- **Subject**: "Log Approved by [Company Name]"
+- **Content**: Professional HTML with price and completion date
+- **Styling**: Green theme with success indicators
 
 ### Rejection Email
-When a log is rejected, users receive:
-- **Subject**: "Maintenance Log Rejected"
-- **Content**:
-  - Greeting with user name
-  - Log title and status
-  - Contact information for service center
-  - Styled HTML template
+- **Subject**: "Log Rejected by [Company Name]"
+- **Content**: Professional HTML with rejection reason
+- **Styling**: Red theme with error indicators
 
-## Troubleshooting
+### Completion Email
+- **Subject**: "Repair Completed by [Company Name]"
+- **Content**: Professional HTML with completion notification
+- **Styling**: Blue theme with completion indicators
 
-### Common Issues
+## Testing Email Configuration
+
+### 1. Command Line Testing
+```bash
+cd backend
+node testEmail.js
+```
+
+### 2. API Testing
+```bash
+# Test email endpoint (requires authentication)
+curl -X POST http://localhost:5000/api/test/email \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{"email": "test@example.com"}'
+```
+
+### 3. Server Startup Verification
+When you start the server, look for:
+```
+🔧 Verifying email service configuration...
+✅ Email service ready for notifications
+```
+
+## Integration Points
+
+### 1. Log Controller (`logController.js`)
+- Sends emails when log status changes via `updateLog`
+- Uses `sendLogStatusEmail` for consistent formatting
+- Handles email failures gracefully
+
+### 2. Admin Controller (`adminController.js`)
+- Sends emails when admins accept/reject logs
+- Includes company name in emails
+- Provides detailed feedback on email success/failure
+
+### 3. Server Startup (`server.js`)
+- Verifies email configuration on startup
+- Logs email service status
+- Continues running even if email fails
+
+## Error Handling
+
+### Common Issues and Solutions
 
 #### 1. "Authentication failed" Error
 **Cause**: Incorrect email credentials
 **Solution**:
 - Verify EMAIL_USER and EMAIL_PASS in .env
-- Regenerate app password if using Gmail
+- Regenerate Gmail app password
 - Check if 2FA is enabled
 
 #### 2. "Connection failed" Error
 **Cause**: Network or SMTP server issues
 **Solution**:
 - Check internet connection
-- Verify SMTP server settings
+- Verify Gmail SMTP settings
 - Try different email service
 
 #### 3. "Email configuration missing" Error
 **Cause**: Missing environment variables
 **Solution**:
 - Add EMAIL_USER and EMAIL_PASS to .env file
-- Restart the server after adding variables
+- Restart server after adding variables
 
 #### 4. Emails not being sent
 **Cause**: Various configuration issues
 **Solution**:
 - Check backend console for error messages
+- Run test email script
 - Verify email service configuration
-- Test with a simple email first
 
-### Debug Steps
+## Debug Information
 
-1. **Check Backend Logs**
-   Look for these messages in your backend console:
-   ```
-   📧 Sending approval email:
-   📧 To: user@example.com
-   📧 User: John Doe
-   📧 Log: Oil Change
-   📧 Status: accepted
-   ✅ Email sent successfully!
-   ```
+### Backend Logs
+The system provides detailed logging:
+```
+📧 Sending log status email:
+📧 To: user@example.com
+📧 User: John Doe
+📧 Log: Oil Change
+📧 Status: accepted
+📧 Company: Tata Motors
+✅ Log status email sent successfully!
+```
 
-2. **Verify Email Configuration**
-   ```bash
-   # In backend directory
-   node -e "
-   require('dotenv').config();
-   console.log('EMAIL_USER:', process.env.EMAIL_USER);
-   console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? 'Set' : 'Not set');
-   "
-   ```
+### Email Response Objects
+All email functions return structured responses:
+```javascript
+{
+  success: true,
+  messageId: "abc123@example.com"
+}
 
-3. **Test Email Service**
-   ```javascript
-   // Add this to your server.js for testing
-   const { verifyTransporter } = require('./utils/emailService');
-   
-   // Test on server start
-   verifyTransporter().then(success => {
-     if (success) {
-       console.log('Email service ready');
-     } else {
-       console.log('Email service not configured');
-     }
-   });
-   ```
+// or on failure:
+{
+  success: false,
+  error: "Authentication failed"
+}
+```
 
 ## Security Considerations
 
@@ -170,6 +187,7 @@ When a log is rejected, users receive:
 2. **Use app passwords** instead of regular passwords
 3. **Enable 2FA** on your email account
 4. **Use environment variables** for all sensitive data
+5. **Validate email addresses** before sending
 
 ## Production Deployment
 
@@ -190,4 +208,42 @@ EMAIL_PASS=your_production_app_password
 - Monitor email delivery rates
 - Set up email bounce handling
 - Log email sending attempts
-- Set up alerts for email failures 
+- Set up alerts for email failures
+
+## API Endpoints
+
+### Test Email Endpoint
+- **POST** `/api/test/email`
+- **Auth**: Required (JWT token)
+- **Body**: `{ "email": "test@example.com" }`
+- **Response**: Success/failure status with details
+
+## Usage Examples
+
+### Sending a Test Email
+```javascript
+const { sendTestEmail } = require('./utils/emailService');
+
+const result = await sendTestEmail('test@example.com');
+if (result.success) {
+  console.log('Test email sent!');
+} else {
+  console.error('Failed:', result.error);
+}
+```
+
+### Sending a Status Email
+```javascript
+const { sendLogStatusEmail } = require('./utils/emailService');
+
+const result = await sendLogStatusEmail(
+  'user@example.com',
+  'John Doe',
+  'Oil Change',
+  'accepted',
+  'Tata Motors',
+  { price: 1500, completionDate: new Date() }
+);
+```
+
+The enhanced email system is now production-ready with comprehensive error handling, testing capabilities, and professional email templates! 
